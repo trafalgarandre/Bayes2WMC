@@ -21,7 +21,6 @@ private:
     unordered_map<int, double> probs;
     int seed = 1;
     CNFFormula formula;
-    double C = 1;
 
 
 	CNFFormula generateIndicator();

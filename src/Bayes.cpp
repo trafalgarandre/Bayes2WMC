@@ -7,11 +7,8 @@ CNFFormula Bayes::generateIndicator() {
         vector<int> clause;
         for (int j = 0; j < cardinality[i]; j++) {
             string key = to_string(i) + " " + to_string(j);
-            //cout << key << " :" << seed << '\n';
             hmap.emplace(key, seed);
             clause.push_back(seed);
-            probs.emplace(seed, 1);
-            probs.emplace(-seed, 1);
             seed++;
         }
         result.addClause(clause);
@@ -23,11 +20,13 @@ CNFFormula Bayes::generateIndicator() {
                 only1Clause.push_back(-(hmap.at(key1)));
                 only1Clause.push_back(-(hmap.at(key2)));
                 result.addClause(only1Clause);
+                only1Clause.clear();
             }
         }
     }
     return result;
 }
+
 CNFFormula Bayes::generateParameter() {
     CNFFormula result;
     //cout << "Haha\n";
@@ -40,16 +39,13 @@ CNFFormula Bayes::generateParameter() {
         int index = 0;
         CNFFormula param_clause_2;
         while (pos >= 0) {
-            //cout << "looping";
             CNFFormula param_clause_1;
             for (int j = 0; j < parents.size(); j++) {
                 if (j != parents.size() - 1) {
                     string key = to_string(parent[i][j]) + " " + to_string(arr[j]);
-                    //cout << key << ' ' << -hmap.at(key) << '\n';
                     param_clause_1.and1Var(hmap.at(key));
                 } else {
                     string key = to_string(i) + " " + to_string(arr[j]);
-                    //cout << key << ' ' << -hmap.at(key) << '\n';
                     param_clause_1.and1Var(hmap.at(key));
                 }
             }
@@ -63,7 +59,6 @@ CNFFormula Bayes::generateParameter() {
             bool step = false;
             
             while (arr[pos] == cardinality[parents[pos]] - 1) {
-                //cout <<"againagain";
                 pos--;
                 step = true;
             }
@@ -145,7 +140,6 @@ void Bayes::createKB() {
 
 void Bayes::addEvid(string evidFileName) {
     
-    //cout << "waiting";
     ifstream evidFile;
     evidFile.open(evidFileName);
     
@@ -161,7 +155,6 @@ void Bayes::addEvid(string evidFileName) {
     formula.andFormula(evid);
     
     evidFile.close();
-    //cout << "finish";
 }
 
 Bayes::Bayes(string input) {
@@ -174,7 +167,7 @@ void Bayes::printKB(string cnfFileName, string weightFileName) {
     ofstream cnfFile, weightFile;
     cnfFile.open(cnfFileName);
     weightFile.open(weightFileName);
-    cnfFile << "p cnf " << seed << " " << formula.getNumClause() << "\n";
+    cnfFile << "p cnf " << seed - 1<< " " << formula.getNumClause() << "\n";
 
     for (vector<int> clause: formula.getFormula()) {
         for (int i: clause) {

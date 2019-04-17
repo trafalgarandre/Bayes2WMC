@@ -29,14 +29,11 @@ void CNFFormula::andFormula(CNFFormula f) {
 
 void CNFFormula::or1Var(int v) {
 	int size = getNumClause();
-	//cout << "or " << v << '\n';
 	if (formula.size() == 0) {
-		//cout << "push2 \n";
 		formula.push_back({v});
 	} else {
 		for (int i = 0; i < size; i++) {
 			formula[i].push_back(v);
-			//cout << "push \n"; 
 		}
 	}
 }
