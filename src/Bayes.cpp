@@ -8,6 +8,8 @@ CNFFormula Bayes::generateIndicator() {
         for (int j = 0; j < cardinality[i]; j++) {
             string key = to_string(i) + " " + to_string(j);
             hmap.emplace(key, seed);
+            probs.emplace(seed, 1);
+            probs.emplace(-seed, 1);
             clause.push_back(seed);
             seed++;
         }
@@ -27,7 +29,68 @@ CNFFormula Bayes::generateIndicator() {
     return result;
 }
 
-CNFFormula Bayes::generateParameter() {
+CNFFormula Bayes::generateParameter2() {
+   // cout << "param 2";
+    CNFFormula result;
+    for (int i = 0; i < num_nodes; i++) {
+        vector<int> parents = parent[i];
+        parents.push_back(i);
+        int pos = parents.size() - 1;
+        int arr[parents.size()];
+        memset(arr, 0, sizeof(arr));
+        int index = 0;
+        while (pos >= 0) {
+            //cout << "INDEX " << index << '\n';
+            //cout << "new\n";
+            CNFFormula param_clause;
+            for (int j = 0; j < parents.size(); j++) {
+                if (j != parents.size() - 1) {
+                    string key = to_string(parent[i][j]) + " " + to_string(arr[j]);
+                    param_clause.or1Var(-hmap.at(key));
+                    //cout << key << " ";
+                }
+            }
+            //cout << (to_string(i) + " " + to_string(arr[parents.size() - 1])) << '\n';
+            param_clause.or1Var(hmap.at(to_string(i) + " " + to_string(arr[parents.size() - 1])));
+            double temp_prob = cpt[i][index];
+            double temp_prob2 = 1;
+            for (int j = 0; j < arr[parents.size() - 1]; j++) {
+                temp_prob2 -= cpt[i][index - j - 1];
+                param_clause.or1Var(seed - j - 1);
+            }
+            if (arr[parents.size() - 1] != cardinality[parents[parents.size() - 1]] - 1) {
+                temp_prob = temp_prob / temp_prob2;
+                //cout << fixed << " " << temp_prob << " " << 1 - temp_prob << '\n';
+               // cout << "the fuck" << arr[parents.size() - 1] << "\n";
+                param_clause.or1Var(-seed);
+                probs.emplace(seed, temp_prob);
+                probs.emplace(-seed, 1 - temp_prob);
+                seed++;
+            }
+            result.andFormula(param_clause);
+            bool step = false;
+            while (arr[pos] == cardinality[parents[pos]] - 1) {
+                pos--;
+                step = true;
+            }
+            index++;
+            if (pos >= 0) {
+                arr[pos]++;
+                if (step) {
+                    for (int j = pos + 1; j < parents.size(); j++) {
+                        arr[j] = 0;
+                    }
+                    pos = parents.size() - 1;
+                }
+            }
+        }
+    }
+    
+    return result;
+
+}
+
+CNFFormula Bayes::generateParameter1() {
     CNFFormula result;
     //cout << "Haha\n";
     for (int i = 0; i < num_nodes; i++) {
@@ -64,12 +127,12 @@ CNFFormula Bayes::generateParameter() {
             }
             index++;
             if (pos >= 0) {
-                if (!step) {
-                    arr[pos]++;
-                } else {
+                arr[pos]++;
+                if (step) {
                     for (int j = pos + 1; j < parents.size(); j++) {
                         arr[j] = 0;
                     }
+                    pos = parents.size() - 1;
                 }
             }
         }
@@ -132,9 +195,14 @@ void Bayes::inputBayes(string input) {
     bayesFile.close();
 }
 
-void Bayes::createKB() {
+void Bayes::createKB(int type) {
     formula = generateIndicator();
-    CNFFormula par = generateParameter();
+    CNFFormula par;
+    if (type == 0) {
+        par = generateParameter1();
+    } else {
+        par = generateParameter2();
+    }
     formula.andFormula(par);
 }
 
@@ -157,9 +225,9 @@ void Bayes::addEvid(string evidFileName) {
     evidFile.close();
 }
 
-Bayes::Bayes(string input) {
+Bayes::Bayes(string input, int type) {
     inputBayes(input);
-    createKB();
+    createKB(type);
 }
 
 void Bayes::printKB(string cnfFileName, string weightFileName) {
@@ -178,7 +246,7 @@ void Bayes::printKB(string cnfFileName, string weightFileName) {
 
     weightFile << "p " << seed - 1 << '\n';
     for (pair<int, double> element : probs) {
-        weightFile << "w " << element.first << " " << element.second << " 0\n";
+        weightFile << fixed << "w " << element.first << " " << element.second << " 0\n";
     }
 
     weightFile.close();

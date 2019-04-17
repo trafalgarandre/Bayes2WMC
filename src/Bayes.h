@@ -24,12 +24,13 @@ private:
 
 
 	CNFFormula generateIndicator();
-    CNFFormula generateParameter();
-    void createKB();
+    CNFFormula generateParameter1();
+    CNFFormula generateParameter2();
+    void createKB(int type);
     void inputBayes(string input);
 public:
 
-	Bayes(string input);
+	Bayes(string input, int type);
 	void printKB(string cnfFileName, string CFileName);
     void addEvid(string evidFileName);
 };
