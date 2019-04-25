@@ -1,8 +1,8 @@
 # Encoding Bayesian Network to Weighted Model Counting
 ## CLI usage
 ```
-./bayes2cnf.sh [--input <path-to-input> --evid <path-to-evidence> --type <type of encoding>]
-Example: ./bayes2wmc.sh input.txt evid.txt 1
+./bayes2wmc [-h] <input> <evid> [<type>]
+Example: ./bayes2wmc input.uai input.uai.evid 1
 ```
 There are two types of encoding (0 and 1)
 
