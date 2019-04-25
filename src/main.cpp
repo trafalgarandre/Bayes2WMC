@@ -1,5 +1,6 @@
 #include <iostream>
 #include <algorithm>
+#include <regex>
 #include "Bayes.h"
 
 using namespace std;
@@ -37,6 +38,21 @@ class InputParser{
         std::vector <std::string> tokens;
 };
 
+bool checkFormat(string input, string evid) {
+	regex r_input(".*\\.uai$");
+	if (!regex_match(input, r_input)) {
+		cout << "Input needs to be in .uai format\n";
+		return false;
+	}
+	regex r_evid(".*\\.uai\\.evid$");
+	if (!regex_match(evid, r_evid)) {
+		cout << "Input needs to be in .uai.evid format\n";
+		return false;
+	}
+	return true;
+
+}
+
 int main(int argc, char** argv)
 {
 	InputParser inputParser(argc, argv);
@@ -47,13 +63,15 @@ int main(int argc, char** argv)
 	string input, evid;
 	input = argv[1];
 	evid = argv[2];
-	int type = 0;
-	cout << argc;
-	if (argc == 4) {
-		type = stoi(argv[3]);
+	if (checkFormat(input, evid)) {
+		int type = 0;
+		cout << argc;
+		if (argc == 4) {
+			type = stoi(argv[3]);
+		}
+		Bayes* bayes = new Bayes(input, type);
+		bayes->addEvid(evid);
+		bayes->printKB("cnf.txt","weight.txt");
 	}
-	Bayes* bayes = new Bayes(input, type);
-	bayes->addEvid(evid);
-	bayes->printKB("cnf.txt","weight.txt");
-    return 0;
+	return 0;
 }
