@@ -1,6 +1,6 @@
 # Encoding Bayesian Network to Weighted Model Counting
 
-##COMPILATION
+## COMPILATION
 
 A simple Makefile is provided for compilation, which can be
 compiled by simply running the "make" command.
